@@ -135,11 +135,20 @@ const ratingBadgeBg      = useColorModeValue('whiteAlpha.900', 'blackAlpha.700')
 
   // ── Fetch data ────────────────────────────────────────────────────────────
   useEffect(() => {
-    // Tour featured (ambil semua published, filter featured di frontend)
+    // Tour featured — komposisi 1 SOT + 2 Private, urut by rating lalu reviews_count
     apiClient.get('/tours').then(res => {
       const all: ApiTour[] = res.data.data ?? [];
-      const featured = all.filter(t => t.featured).slice(0, 3);
-      setFeaturedTours(featured.length > 0 ? featured : all.slice(0, 3));
+      const byRating = (a: ApiTour, b: ApiTour) =>
+        b.rating - a.rating || b.reviews_count - a.reviews_count;
+      const sot   = all.filter(t =>  t.is_open_trip).sort(byRating).slice(0, 1);
+      const priv  = all.filter(t => !t.is_open_trip).sort(byRating).slice(0, 2);
+      let featured = [...sot, ...priv];
+      if (featured.length < 3) {
+        const used = new Set(featured.map(t => t.id));
+        const pool = [...all].sort(byRating).filter(t => !used.has(t.id));
+        featured   = [...featured, ...pool].slice(0, 3);
+      }
+      setFeaturedTours(featured);
     }).catch(() => {}).finally(() => setLoadingTours(false));
 
     // Top guides
@@ -233,17 +242,15 @@ const ratingBadgeBg      = useColorModeValue('whiteAlpha.900', 'blackAlpha.700')
                         <Badge key={tag} variant="solid" bgGradient={accentGradient} color="white" px={2.5} py={1} borderRadius="md" fontSize="xs" boxShadow="sm">{tag}</Badge>
                       ))}
                     </HStack>
-                    {tour.is_open_trip && (
-                      <Badge
-                        position="absolute" top={4} right={4}
-                        colorScheme="purple" variant="solid"
-                        px={3} py={1} borderRadius="full"
-                        fontSize="xs" fontWeight="bold"
-                        boxShadow="md" pointerEvents="none"
-                      >
-                        Smart Open Trip
-                      </Badge>
-                    )}
+                    <Badge
+                      position="absolute" top={4} right={4}
+                      colorScheme={tour.is_open_trip ? "purple" : "blue"} variant="solid"
+                      px={3} py={1} borderRadius="full"
+                      fontSize="xs" fontWeight="bold"
+                      boxShadow="md" pointerEvents="none"
+                    >
+                      {tour.is_open_trip ? "Smart Open Trip" : "Private Trip"}
+                    </Badge>
                     <Flex position="absolute" bottom={4} left={4} bg={ratingBadgeBg} backdropFilter="blur(8px)" px={3} py={1.5} borderRadius="lg" alignItems="center" boxShadow="md">
                       <Icon as={ChakraStarIcon} fill="yellow.400" color="yellow.400" boxSize={4} mr={1.5} />
                       <Text fontWeight="bold" color={primaryTextColor} fontSize="sm">{tour.rating.toFixed(1)}</Text>
