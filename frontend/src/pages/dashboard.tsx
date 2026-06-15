@@ -233,17 +233,16 @@ const ratingBadgeBg      = useColorModeValue('whiteAlpha.900', 'blackAlpha.700')
                         <Badge key={tag} variant="solid" bgGradient={accentGradient} color="white" px={2.5} py={1} borderRadius="md" fontSize="xs" boxShadow="sm">{tag}</Badge>
                       ))}
                     </HStack>
-                    {tour.is_open_trip && (
-                      <Badge
-                        position="absolute" top={4} right={4}
-                        colorScheme="purple" variant="solid"
-                        px={3} py={1} borderRadius="full"
-                        fontSize="xs" fontWeight="bold"
-                        boxShadow="md" pointerEvents="none"
-                      >
-                        Smart Open Trip
-                      </Badge>
-                    )}
+                    <Badge
+                      position="absolute" top={4} right={4}
+                      colorScheme={tour.is_open_trip ? "purple" : "blue"}
+                      variant="solid"
+                      px={3} py={1} borderRadius="full"
+                      fontSize="xs" fontWeight="bold"
+                      boxShadow="md" pointerEvents="none"
+                    >
+                      {tour.is_open_trip ? "Smart Open Trip" : "Private Trip"}
+                    </Badge>
                     <Flex position="absolute" bottom={4} left={4} bg={ratingBadgeBg} backdropFilter="blur(8px)" px={3} py={1.5} borderRadius="lg" alignItems="center" boxShadow="md">
                       <Icon as={ChakraStarIcon} fill="yellow.400" color="yellow.400" boxSize={4} mr={1.5} />
                       <Text fontWeight="bold" color={primaryTextColor} fontSize="sm">{tour.rating.toFixed(1)}</Text>
