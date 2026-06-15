@@ -8,6 +8,7 @@ import {
   VStack,
   HStack,
   Button,
+  Icon,
   IconButton,
   Tag,
   AlertDialog,
